@@ -3,7 +3,9 @@
 #!author=Custom
 #!system=iOS,iPadOS
 #!loon_version=3.5.1(983)
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Fanqie.png
 #!type=normal
+
 
 [Argument]
 BaseAd = switch,true,tag=基础去广告,desc=拦截明确广告API、广告素材和广告视频，建议开启
@@ -13,46 +15,59 @@ TrackingCleaner = switch,true,tag=广告追踪清理,desc=拦截及清理广告�
 AggressiveAd = switch,false,tag=加强广告拦截,desc=额外清理动态广告包及部分高强度广告资源，默认关闭
 Debug = switch,false,tag=调试日志,desc=输出清理路径、账户保护及删除数量
 
+
 [Rewrite]
 # 穿山甲/Pangle 广告获取
 request if ${BaseAd} == true && ${url} ~= /^https?:\/\/[^\/]+\.pangolin-sdk-toutiao\.com\/api\/ad\/union\/sdk\/get_ads\/?/i then reject_dict(200)
 request if ${BaseAd} == true && ${url} ~= /^https?:\/\/[^\/]+\.pangolin-sdk-toutiao\.com\/api\/ad\/union\/sdk\/settings\/?/i then reject_dict(200)
 request if ${TrackingCleaner} == true && ${url} ~= /^https?:\/\/[^\/]+\.pangolin-sdk-toutiao\.com\/api\/ad\/union\/sdk\/stats\/?/i then reject_dict(200)
 
+
 # 广告签名/素材
 request if ${BaseAd} == true && ${url} ~= /^https?:\/\/p6-ad-sign\.byteimg\.com\//i then reject_img(200)
 request if ${BaseAd} == true && ${url} ~= /^https?:\/\/p9-ad-sign\.byteimg\.com\//i then reject_img(200)
 
+
 # Pangle 广告视频
 request if ${BaseAd} == true && ${url} ~= /^https?:\/\/[^\/]+\.pglstatp-toutiao\.com\/.*\/toutiao\.mp4(?:\?.*)?$/i then reject_video(200)
 
+
 # 广告安装包
 request if ${BaseAd} == true && ${url} ~= /^https?:\/\/[^\/]+\.(?:pglstatp-toutiao|pstatp)\.com\/(?:obj|img)\/ad-app-package\/.*/i then reject(200)
+
 
 # 明确广告素材目录
 request if ${BaseAd} == true && ${url} ~= /^https?:\/\/[^\/]+\.(?:pglstatp-toutiao|pstatp)\.com\/(?:obj|img)\/ad\/.*/i then reject_img(200)
 request if ${BaseAd} == true && ${url} ~= /^https?:\/\/[^\/]+\.(?:pglstatp-toutiao|pstatp)\.com\/(?:obj|img)\/web\.business\.image\/.*/i then reject_img(200)
 
+
 # 广告渲染器
 request if ${BaseAd} == true && ${url} ~= /^https?:\/\/[^\/]+\.(?:pglstatp-toutiao|pstatp)\.com\/obj\/ad-pattern\/renderer/i then reject(200)
+
 
 # from=ad 广告素材
 request if ${BaseAd} == true && ${url} ~= /^https?:\/\/[^\/]+\.pstatp\.com\/obj\/mosaic-legacy\/.*[?&]from=ad(?:&|$)/i then reject_img(200)
 
+
 # 广告追踪资源
 request if ${TrackingCleaner} == true && ${url} ~= /^https?:\/\/[^\/]+\.pstatp\.com\/bytecom\/resource\/track_log\/src\/.*/i then reject(200)
+
 
 # byteimg 明确广告资源
 request if ${BaseAd} == true && ${url} ~= /^https?:\/\/[^\/]+\.byteimg\.com\/ad-app-package\/.*/i then reject(200)
 request if ${BaseAd} == true && ${url} ~= /^https?:\/\/[^\/]+\.byteimg\.com\/web\.business\.image\/.*/i then reject_img(200)
 
+
 # 加强模式：动态广告资源
 request if ${AggressiveAd} == true && ${url} ~= /^https?:\/\/gurd\.snssdk\.com\/src\/server\/v3\/package/i then reject(200)
+
 
 [Script]
 # 业务JSON垃圾清理：账户/登录/验证码/Token/Session等数据由脚本强保护
 response if ${url} ~= /^https:\/\/(?:[^\/]+\.)?novelapp\.ixigua\.com\/.*$/i && ${response.status} == 200 && ${response.header['Content-Type']} ~= /(application\/json|text\/json)/i then script("https://raw.githubusercontent.com/IMAiCool/Loon/main/fanqie_ad_filter.js", {${EmbeddedCleaner}, ${MarketingCleaner}, ${TrackingCleaner}, ${Debug}}) with enable=${EmbeddedCleaner},debug=${Debug},tag="番茄内嵌垃圾清理",requires_body=true,timeout=20
 
+
 [MITM]
 # 不对 *.snssdk.com 做通配MITM，避免影响登录/验证码/Token业务
 hostname = *.pangolin-sdk-toutiao.com,*.pglstatp-toutiao.com,*.pstatp.com,*.byteimg.com,gurd.snssdk.com,novelapp.ixigua.com,*.novelapp.ixigua.com
+
