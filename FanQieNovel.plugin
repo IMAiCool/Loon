@@ -51,7 +51,7 @@ request if ${AggressiveAd} == true && ${url} ~= /^https?:\/\/gurd\.snssdk\.com\/
 
 [Script]
 # 业务JSON垃圾清理：账户/登录/验证码/Token/Session等数据由脚本强保护
-response if ${url} ~= /^https:\/\/(?:[^\/]+\.)?novelapp\.ixigua\.com\/.*$/i && ${response.status} == 200 && ${response.header['Content-Type']} ~= /(application\/json|text\/json)/i then script("fanqie_ad_filter.js", {${EmbeddedCleaner}, ${MarketingCleaner}, ${TrackingCleaner}, ${Debug}}) with enable=${EmbeddedCleaner},debug=${Debug},tag="番茄内嵌垃圾清理",requires_body=true,timeout=20
+response if ${url} ~= /^https:\/\/(?:[^\/]+\.)?novelapp\.ixigua\.com\/.*$/i && ${response.status} == 200 && ${response.header['Content-Type']} ~= /(application\/json|text\/json)/i then script("https://raw.githubusercontent.com/IMAiCool/Loon/main/fanqie_ad_filter.js", {${EmbeddedCleaner}, ${MarketingCleaner}, ${TrackingCleaner}, ${Debug}}) with enable=${EmbeddedCleaner},debug=${Debug},tag="番茄内嵌垃圾清理",requires_body=true,timeout=20
 
 [MITM]
 # 不对 *.snssdk.com 做通配MITM，避免影响登录/验证码/Token业务
