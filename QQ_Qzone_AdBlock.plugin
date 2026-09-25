@@ -1,0 +1,87 @@
+#!name = QQ & QQ空间去广告
+#!desc = 去除 QQ/QQ空间开屏广告、好友动态信息流广告、广点通推广、广告素材、曝光/点击上报及部分运营广告；尽量不影响登录、聊天、语音视频、文件、空间正常动态。
+#!author = 零一
+#!icon = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/QQ.png
+#!tag = QQ,QQ空间,去广告,净化
+#!system = iOS,iPadOS
+
+# ==================================================
+# QQ & QQ空间 Loon 去广告
+#
+# 重点处理：
+# 1. QQ空间开屏广告
+# 2. QQ空间好友动态 / 信息流广点通广告
+# 3. 腾讯 GDT 广告素材
+# 4. 广告曝光 / 点击 / SDK 上报
+# 5. QQ 内部分共用腾讯广告 SDK 的推广内容
+#
+# 安全原则：
+# - 不屏蔽整个 qq.com
+# - 不屏蔽整个 gtimg.cn
+# - 不修改 QQ 登录 / 消息 / 文件 / 音视频接口
+# - 不修改 QQ 钱包 / 支付接口
+# ==================================================
+
+[Rule]
+# ---------- 腾讯广点通 / GDT 核心广告 ----------
+DOMAIN,pgdt.gtimg.cn,REJECT
+DOMAIN,rpt.gdt.qq.com,REJECT
+DOMAIN,mi.gdt.qq.com,REJECT
+DOMAIN,v.gdt.qq.com,REJECT
+DOMAIN,win.gdt.qq.com,REJECT
+DOMAIN,c.gdt.qq.com,REJECT
+DOMAIN,c2.gdt.qq.com,REJECT
+DOMAIN,t.gdt.qq.com,REJECT
+DOMAIN-SUFFIX,gdt.qq.com,REJECT
+
+# ---------- 腾讯广告 SDK ----------
+DOMAIN,tangram.e.qq.com,REJECT
+DOMAIN,sdk.e.qq.com,REJECT
+DOMAIN,sdkreport.e.qq.com,REJECT
+
+# ---------- QQ空间已知广告域名 ----------
+DOMAIN,d3g.qq.com,REJECT
+DOMAIN,bsrv.qq.com,REJECT
+DOMAIN,sq.bls.mdt.qq.com,REJECT
+DOMAIN,adsmind.gdtimg.com,REJECT
+DOMAIN,xj-landing.gdtimg.com,REJECT
+
+# ---------- 广告请求 / 上报 ----------
+DOMAIN,us.l.qq.com,REJECT
+DOMAIN,p.l.qq.com,REJECT
+
+# ---------- 广告监测 / 追踪 ----------
+# 这些域名主要用于广告统计、性能/行为上报。
+# 如发现某个 QQ 功能异常，可优先注释掉这一组排查。
+DOMAIN,mazu.m.qq.com,REJECT
+DOMAIN,wspeed.qq.com,REJECT
+DOMAIN,ios.rqd.qq.com,REJECT
+DOMAIN,ping.huatuo.qq.com,REJECT
+
+# ---------- 广告配置 ----------
+DOMAIN,snowflake.qq.com,REJECT
+
+[URL Rewrite]
+# QQ空间 / 腾讯广告素材
+^https?:\/\/pgdt\.gtimg\.cn\/gdt\/.+ - reject
+^https?:\/\/pgdt\.gtimg\.cn\/.+\/snscosdownload\/.+ - reject
+^https?:\/\/pgdt\.gtimg\.cn\/.+\/reserved\/.+ - reject
+
+# 广点通曝光 / 点击 / 统计
+^https?:\/\/rpt\.gdt\.qq\.com\/creative_view(?:\?|\/|$) - reject
+^https?:\/\/(?:rpt|v|c)\.gdt\.qq\.com\/(?:creative_view|gdt_stats|gdt_clickwap)\/.+ - reject
+
+# 广告 SDK
+^https?:\/\/tangram\.e\.qq\.com\/.+ - reject
+^https?:\/\/sdkreport\.e\.qq\.com\/.+ - reject
+
+# QQ广告请求
+^https?:\/\/us\.l\.qq\.com\/exapp(?:\?|\/|$) - reject
+^https?:\/\/p\.l\.qq\.com\/p(?:\?|\/|$) - reject
+
+# QQ空间广告曝光 / 组件上报
+^https?:\/\/h5\.qzone\.qq\.com\/report\/(?:native|compass)(?:\?|\/|$) - reject
+
+[Mitm]
+# 仅解密广告相关域名，不对 QQ 主聊天/登录域名开启 MITM
+hostname = pgdt.gtimg.cn, rpt.gdt.qq.com, v.gdt.qq.com, c.gdt.qq.com, tangram.e.qq.com, sdkreport.e.qq.com, us.l.qq.com, p.l.qq.com, h5.qzone.qq.com
