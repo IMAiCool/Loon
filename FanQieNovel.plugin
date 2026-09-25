@@ -1,84 +1,145 @@
-#!name=番茄小说去广告·加强版
-#!desc=番茄小说开屏/章末/信息流/视频/广告素材/统计追踪拦截
+#!name=番茄小说去广告·可控加强版
+#!desc=基础广告拦截+激进域名开关+内嵌JSON广告清理；默认兼容登录/验证码
 #!author=Custom
-#!system=ios
+#!system=iOS,iPadOS
+#!loon_version=3.5.1(983)
+#!type=normal
+
+[Argument]
+BaseAd = switch,true,tag=基础去广告,desc=建议常开；穿山甲、广告素材、广告视频等
+Aggressive = switch,false,tag=激进域名拦截,desc=默认关闭；开启可能影响登录、验证码、签到或部分业务接口
+EmbeddedAd = switch,true,tag=内嵌广告清理,desc=清理接口JSON中嵌入的广告对象
+Tracking = switch,true,tag=广告追踪拦截,desc=拦截明确的广告统计和追踪请求
+Debug = switch,false,tag=脚本调试日志,desc=出现异常时可打开查看脚本处理内容
+
 
 [Rule]
-# ==================== 番茄广告素材 ====================
+# ==================================================
+# 基础广告域名：默认开启
+# ==================================================
+$if($argument("BaseAd") == true)
+
 DOMAIN,p6-ad-sign.byteimg.com,REJECT
 DOMAIN,p9-ad-sign.byteimg.com,REJECT
-
-# ==================== 穿山甲/Pangle广告 ====================
 DOMAIN-SUFFIX,pglstatp-toutiao.com,REJECT
-DOMAIN-SUFFIX,byteorge.com,REJECT
-DOMAIN-SUFFIX,bytegoofy.com,REJECT
+DOMAIN,api.iegadp.qq.com,REJECT
+DOMAIN,sf3-ttcdn-tos.pstatp.com,REJECT
 
-# ==================== 字节广告/统计 ====================
+$endif
+
+
+# ==================================================
+# 激进模式
+# 默认关闭，需要时手动开启
+# 登录、验证码异常时只需要关掉此开关
+# 不需要删除任何规则
+# ==================================================
+$if($argument("Aggressive") == true)
+
+DOMAIN,i.snssdk.com,REJECT
+DOMAIN,is.snssdk.com,REJECT
 DOMAIN,i-lq.snssdk.com,REJECT
 DOMAIN,mcs.snssdk.com,REJECT
 DOMAIN,security-lq.snssdk.com,REJECT
 DOMAIN,tnc3-alisc1.snssdk.com,REJECT
 DOMAIN,tnc3-aliec2.snssdk.com,REJECT
-
-# ==================== 广告活动 ====================
-DOMAIN,activity-ag.awemeughun.com,REJECT
 DOMAIN,dig.bdurl.net,REJECT
-
-# ==================== 第三方广告 ====================
-DOMAIN,api.iegadp.qq.com,REJECT
-DOMAIN,sf3-ttcdn-tos.pstatp.com,REJECT
-
-# ==================== 激进拦截 ====================
-# 番茄部分广告/配置请求会经过这些地址
-# 若出现登录、书架同步或推荐异常，可优先注释掉这里
-DOMAIN,i.snssdk.com,REJECT
-DOMAIN,is.snssdk.com,REJECT
+DOMAIN,activity-ag.awemeughun.com,REJECT
+DOMAIN-SUFFIX,byteorge.com,REJECT
+DOMAIN-SUFFIX,bytegoofy.com,REJECT
 DOMAIN-KEYWORD,zijieapi,REJECT
 
+$endif
 
-[URL Rewrite]
-# ==================== 穿山甲广告接口 ====================
-^https?:\/\/[^\/]+\.pangolin-sdk-toutiao\.com\/api\/ad\/union\/sdk\/get_ads\/?.* _ reject
-^https?:\/\/[^\/]+\.pangolin-sdk-toutiao\.com\/api\/ad\/union\/sdk\/stats\/?.* _ reject
-^https?:\/\/[^\/]+\.pangolin-sdk-toutiao\.com\/api\/ad\/union\/sdk\/settings\/?.* _ reject
 
-# 合并匹配
-^https?:\/\/[^\/]+\.pangolin-sdk-toutiao\.com\/api\/ad\/union\/sdk\/(get_ads|stats|settings)\/?.* _ reject
+[Rewrite]
+# ==================================================
+# 穿山甲广告 API
+# ==================================================
 
-# ==================== 广告视频 ====================
-^https?:\/\/[^\/]+\.pglstatp-toutiao\.com\/.*\/toutiao\.mp4(?:\?.*)?$ _ reject
-^https?:\/\/[^\/]+\.snssdk\.com\/video\/play\/1\/toutiao\/.*\/mp4(?:\?.*)?$ _ reject
+request if ${BaseAd} == true && ${url} ~= /^https?:\/\/[^\/]+\.pangolin-sdk-toutiao\.com\/api\/ad\/union\/sdk\/get_ads\/?/i then reject_dict(200)
 
-# ==================== 广告安装包/素材 ====================
-^https?:\/\/[^\/]+\.(pglstatp-toutiao|pstatp)\.com\/(obj|img)\/ad-app-package\/.* _ reject
-^https?:\/\/[^\/]+\.(pglstatp-toutiao|pstatp)\.com\/(obj|img)\/ad\/.* _ reject
+request if ${BaseAd} == true && ${url} ~= /^https?:\/\/[^\/]+\.pangolin-sdk-toutiao\.com\/api\/ad\/union\/sdk\/settings\/?/i then reject_dict(200)
 
-# ==================== 广告业务图片 ====================
-^https?:\/\/[^\/]+\.(pglstatp-toutiao|pstatp)\.com\/(obj|img)\/web\.business\.image\/.* _ reject
+# stats 单独受 Tracking 开关控制
+request if ${Tracking} == true && ${url} ~= /^https?:\/\/[^\/]+\.pangolin-sdk-toutiao\.com\/api\/ad\/union\/sdk\/stats\/?/i then reject_dict(200)
 
-# ==================== 广告渲染器 ====================
-^https?:\/\/[^\/]+\.(pglstatp-toutiao|pstatp)\.com\/obj\/ad-pattern\/renderer.* _ reject
 
-# ==================== pstatp广告素材 ====================
-^https?:\/\/[^\/]+\.pstatp\.com\/obj\/mosaic-legacy\/.*[?&]from=ad(?:&|$).* _ reject
-^https?:\/\/[^\/]+\.pstatp\.com\/bytecom\/resource\/track_log\/src\/.* _ reject
+# ==================================================
+# 广告视频
+# ==================================================
 
-# ==================== snssdk广告接口 ====================
-^https?:\/\/[^\/]+\.snssdk\.com\/api\/ad\/.* _ reject
+request if ${BaseAd} == true && ${url} ~= /^https?:\/\/[^\/]+\.pglstatp-toutiao\.com\/.*\/toutiao\.mp4(?:\?.*)?$/i then reject_video(200)
 
-# ==================== 活动/运营广告 ====================
-^https?:\/\/[^\/]+\.snssdk\.com\/motor\/operation\/activity\/display\/config\/V2\/?.* _ reject
 
-# ==================== 动态广告资源包 ====================
-^https?:\/\/gurd\.snssdk\.com\/src\/server\/v3\/package.* _ reject
+# ==================================================
+# 广告安装包
+# ==================================================
 
-# ==================== byteimg广告安装包 ====================
-^https?:\/\/[^\/]+\.byteimg\.com\/ad-app-package\/?.* _ reject
-^https?:\/\/[^\/]+\.byteimg\.com\/web\.business\.image\/?.* _ reject
+request if ${BaseAd} == true && ${url} ~= /^https?:\/\/[^\/]+\.(?:pglstatp-toutiao|pstatp)\.com\/(?:obj|img)\/ad-app-package\/.*/i then reject(200)
 
-# ==================== 部分广告图片 ====================
-^https?:\/\/[^\/]+\.byteimg\.com\/tos-cn-i-1yzifmftcy\/.*-jpeg\.jpeg(?:\?.*)?$ _ reject
+
+# ==================================================
+# 明确广告素材
+# ==================================================
+
+request if ${BaseAd} == true && ${url} ~= /^https?:\/\/[^\/]+\.(?:pglstatp-toutiao|pstatp)\.com\/(?:obj|img)\/ad\/.*/i then reject_img(200)
+
+request if ${BaseAd} == true && ${url} ~= /^https?:\/\/[^\/]+\.(?:pglstatp-toutiao|pstatp)\.com\/(?:obj|img)\/web\.business\.image\/.*/i then reject_img(200)
+
+
+# ==================================================
+# 广告渲染资源
+# ==================================================
+
+request if ${BaseAd} == true && ${url} ~= /^https?:\/\/[^\/]+\.(?:pglstatp-toutiao|pstatp)\.com\/obj\/ad-pattern\/renderer/i then reject(200)
+
+
+# ==================================================
+# from=ad 广告素材
+# ==================================================
+
+request if ${BaseAd} == true && ${url} ~= /^https?:\/\/[^\/]+\.pstatp\.com\/obj\/mosaic-legacy\/.*(?:\?|&)from=ad(?:&|$)/i then reject_img(200)
+
+
+# ==================================================
+# 广告追踪
+# ==================================================
+
+request if ${Tracking} == true && ${url} ~= /^https?:\/\/[^\/]+\.pstatp\.com\/bytecom\/resource\/track_log\/src\/.*/i then reject(200)
+
+
+# ==================================================
+# byteimg：只处理明确广告目录
+# 不封整个 byteimg.com
+# ==================================================
+
+request if ${BaseAd} == true && ${url} ~= /^https?:\/\/[^\/]+\.byteimg\.com\/ad-app-package\/.*/i then reject(200)
+
+request if ${BaseAd} == true && ${url} ~= /^https?:\/\/[^\/]+\.byteimg\.com\/web\.business\.image\/.*/i then reject_img(200)
+
+
+# ==================================================
+# gurd 动态广告资源
+# ==================================================
+
+request if ${BaseAd} == true && ${url} ~= /^https?:\/\/gurd\.snssdk\.com\/src\/server\/v3\/package/i then reject(200)
+
+
+[Script]
+# ==================================================
+# JSON 内嵌广告清理
+#
+# 只处理 novelapp/阅读业务 JSON
+# 脚本内部再次排除：
+# login / passport / auth / sms / verify / account
+#
+# EmbeddedAd 关闭后脚本完全停用
+# ==================================================
+
+response if ${url} ~= /^https:\/\/(?:[^\/]+\.)?novelapp\.ixigua\.com\/.*$/i && ${response.header['Content-Type']} ~= /application\/json/i then script("fanqie_ad_filter.js", {${EmbeddedAd}, ${Debug}}) with tag="番茄内嵌广告清理",requires_body=true,enable=${EmbeddedAd},debug=${Debug}
 
 
 [MITM]
-hostname = *.pangolin-sdk-toutiao.com,pangolin-sdk-toutiao.com,*.pglstatp-toutiao.com,pglstatp-toutiao.com,*.pstatp.com,pstatp.com,*.snssdk.com,snssdk.com,gurd.snssdk.com,*.byteimg.com,byteimg.com
+# 不使用 *.snssdk.com 通配符，避免再次影响登录/验证码
+hostname = *.pangolin-sdk-toutiao.com,*.pglstatp-toutiao.com,*.pstatp.com,*.byteimg.com,gurd.snssdk.com,*.novelapp.ixigua.com,novelapp.ixigua.com
