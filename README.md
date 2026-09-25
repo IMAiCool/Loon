@@ -15,3 +15,9 @@
 - `fanqie_ad_filter.js`：JSON 清理脚本，插件内以绝对 URL 引用。
 
 脚本对登录等 URL 原样放行，并跳过普通 JSON 中常见的账户身份字段。广告和营销字段仍会在其他 JSON 中处理；接口结构未经实际响应逐一验证，不能保证所有功能或登录状态都不受影响。遇到异常先关闭对应开关。
+
+## 抖音 Loon 广告净化插件
+
+插件地址：https://raw.githubusercontent.com/IMAiCool/Loon/main/Douyin/Douyin_Clean.plugin
+
+在 Loon 插件页面通过上述 URL 安装并启用，开启 MitM 并信任证书。推荐、关注、同城、搜索可单独开关；开屏实验功能默认关闭。使用说明见 [`Douyin/README.md`](Douyin/README.md)。
