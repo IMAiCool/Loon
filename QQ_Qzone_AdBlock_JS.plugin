@@ -1,0 +1,67 @@
+#!name = QQ & QQ空间去广告 JS增强版
+#!desc = QQ/QQ空间广点通广告拦截 + Qzone JSON/JSONP响应净化；重点清理好友动态广告、推广卡片、GDT素材与上报。保留登录、聊天、发动态、评论、点赞、文件、音视频与支付核心功能。
+#!author = 零一
+#!icon = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/QQ.png
+#!tag = QQ,QQ空间,去广告,JS净化
+#!system = iOS,iPadOS
+#!loon_version = 3.5.1(983)
+
+# ==================================================
+# 使用前：
+# 1. 安装并启用本插件，脚本从本仓库自动加载
+# 2. Loon MITM 证书需已安装并信任
+# 3. 如已启用旧版 QQ_Qzone_AdBlock.plugin，请先停用以免重复规则
+# ==================================================
+
+[Rule]
+# 腾讯广点通 / GDT
+DOMAIN,pgdt.gtimg.cn,REJECT
+DOMAIN,rpt.gdt.qq.com,REJECT
+DOMAIN,mi.gdt.qq.com,REJECT
+DOMAIN,v.gdt.qq.com,REJECT
+DOMAIN,win.gdt.qq.com,REJECT
+DOMAIN,c.gdt.qq.com,REJECT
+DOMAIN,c2.gdt.qq.com,REJECT
+DOMAIN,t.gdt.qq.com,REJECT
+DOMAIN-SUFFIX,gdt.qq.com,REJECT
+
+# 腾讯广告 SDK
+DOMAIN,tangram.e.qq.com,REJECT
+DOMAIN,sdk.e.qq.com,REJECT
+DOMAIN,sdkreport.e.qq.com,REJECT
+
+# QQ空间已知广告链路
+DOMAIN,d3g.qq.com,REJECT
+DOMAIN,bsrv.qq.com,REJECT
+DOMAIN,sq.bls.mdt.qq.com,REJECT
+DOMAIN,adsmind.gdtimg.com,REJECT
+DOMAIN,xj-landing.gdtimg.com,REJECT
+DOMAIN,us.l.qq.com,REJECT
+DOMAIN,p.l.qq.com,REJECT
+
+[Rewrite]
+# GDT 广告素材
+request if ${url} ~= /^https?:\/\/pgdt\.gtimg\.cn\/gdt\/.+/i then reject(200)
+request if ${url} ~= /^https?:\/\/pgdt\.gtimg\.cn\/.+\/snscosdownload\/.+/i then reject(200)
+request if ${url} ~= /^https?:\/\/pgdt\.gtimg\.cn\/.+\/reserved\/.+/i then reject(200)
+
+# 广告曝光 / 点击 / 统计
+request if ${url} ~= /^https?:\/\/(?:rpt|v|c)\.gdt\.qq\.com\/(?:creative_view|gdt_stats|gdt_clickwap)(?:\/|\?|$).+/i then reject(200)
+request if ${url} ~= /^https?:\/\/tangram\.e\.qq\.com\/.+/i then reject(200)
+request if ${url} ~= /^https?:\/\/sdkreport\.e\.qq\.com\/.+/i then reject(200)
+request if ${url} ~= /^https?:\/\/us\.l\.qq\.com\/exapp(?:\?|\/|$)/i then reject(200)
+request if ${url} ~= /^https?:\/\/p\.l\.qq\.com\/p(?:\?|\/|$)/i then reject(200)
+
+# QQ空间广告曝光 / 组件上报
+request if ${url} ~= /^https?:\/\/h5\.qzone\.qq\.com\/report\/(?:native|compass)(?:\?|\/|$)/i then reject(200)
+
+[Script]
+# QQ空间好友动态主Feed（当前网页/数据侧仍在使用）
+response if ${url} ~= /^https?:\/\/(?:user|h5)\.qzone\.qq\.com\/proxy\/domain\/ic2\.qzone\.qq\.com\/cgi-bin\/feeds\/feeds3_html_more(?:\?|$)/i then script("https://raw.githubusercontent.com/IMAiCool/Loon/main/QQ_Qzone_Clean.js") with requires_body=true,timeout=10,tag="QQ空间Feed广告净化"
+
+# 说说列表 / 详情 JSONP
+response if ${url} ~= /^https?:\/\/(?:user|h5)\.qzone\.qq\.com\/proxy\/domain\/taotao(?:\.qzone)?\.qq\.com\/cgi-bin\/emotion_cgi_(?:msglist_v6|msgdetail_v6)(?:\?|$)/i then script("https://raw.githubusercontent.com/IMAiCool/Loon/main/QQ_Qzone_Clean.js") with requires_body=true,timeout=10,tag="QQ空间说说广告净化"
+
+[Mitm]
+# 仅广告域名 + Qzone文本Feed接口需要MITM
+hostname = pgdt.gtimg.cn, rpt.gdt.qq.com, v.gdt.qq.com, c.gdt.qq.com, tangram.e.qq.com, sdkreport.e.qq.com, us.l.qq.com, p.l.qq.com, h5.qzone.qq.com, user.qzone.qq.com
