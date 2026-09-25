@@ -1,0 +1,22 @@
+#!name = 抖音广告净化（谨慎版）
+#!desc = 过滤明确标记的广告条目；账户、登录、私信、评论与视频播放请求不处理
+#!author = Codex
+#!type = normal
+
+[Argument]
+feed = switch,true,tag=推荐流广告
+following = switch,true,tag=关注流广告
+nearby = switch,true,tag=同城流广告
+search = switch,true,tag=搜索广告
+splash = switch,false,tag=开屏广告（实验）
+
+[Script]
+http-response ^https:\/\/(?:aweme\.snssdk\.com|[A-Za-z0-9-]+\.amemv\.com)\/aweme\/v\d+\/feed\/ script-path=https://raw.githubusercontent.com/IMAiCool/Loon/main/Douyin/Douyin_Clean.js,requires-body=true,tag=抖音推荐流,argument={feed,following,nearby,search,splash},enabled={feed}
+http-response ^https:\/\/(?:aweme\.snssdk\.com|[A-Za-z0-9-]+\.amemv\.com)\/aweme\/v\d+\/follow\/feed\/ script-path=https://raw.githubusercontent.com/IMAiCool/Loon/main/Douyin/Douyin_Clean.js,requires-body=true,tag=抖音关注流,argument={feed,following,nearby,search,splash},enabled={following}
+http-response ^https:\/\/(?:aweme\.snssdk\.com|[A-Za-z0-9-]+\.amemv\.com)\/aweme\/v\d+\/nearby\/feed\/ script-path=https://raw.githubusercontent.com/IMAiCool/Loon/main/Douyin/Douyin_Clean.js,requires-body=true,tag=抖音同城流,argument={feed,following,nearby,search,splash},enabled={nearby}
+http-response ^https:\/\/(?:aweme\.snssdk\.com|[A-Za-z0-9-]+\.amemv\.com)\/aweme\/v\d+\/(?:search\/item|general\/search\/single|hot\/search\/video\/list)\/ script-path=https://raw.githubusercontent.com/IMAiCool/Loon/main/Douyin/Douyin_Clean.js,requires-body=true,tag=抖音搜索,argument={feed,following,nearby,search,splash},enabled={search}
+# 接口与缓存行为未经当前 iOS 抖音抓包核实，保持默认关闭
+http-response ^https:\/\/aweme\.snssdk\.com\/api\/ad\/v\d+\/splash\/ script-path=https://raw.githubusercontent.com/IMAiCool/Loon/main/Douyin/Douyin_Clean.js,requires-body=true,tag=抖音开屏实验,argument={feed,following,nearby,search,splash},enabled={splash}
+
+[MitM]
+hostname = aweme.snssdk.com, *.amemv.com
