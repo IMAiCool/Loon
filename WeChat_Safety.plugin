@@ -1,0 +1,21 @@
+#!name = 微信安全与基础业务直连
+#!desc = 微信安全中心及基础业务域名直连；不能保证覆盖全部安全接口
+#!author = IMAiCool
+#!icon = https://raw.githubusercontent.com/shindgewongxj/WHATSINStash/main/icon/wechat.png
+#!homepage = https://github.com/IMAiCool/Loon
+
+# 直连分流规则；无需脚本和 MitM。DIRECT 不覆盖复写拒绝及上游 DNS 拦截。
+# 域名清单来自原有白名单与社区 WeChat 分类；不表示均为安全接口。
+[Rule]
+DOMAIN,weixin110.qq.com,DIRECT
+DOMAIN,apd-pcdnwxlogin.teg.tencent-cloud.net,DIRECT
+DOMAIN,wx.tenpay.com,DIRECT
+DOMAIN-SUFFIX,weixin.qq.com,DIRECT
+DOMAIN-SUFFIX,weixin.com,DIRECT
+DOMAIN-SUFFIX,wechat.com,DIRECT
+DOMAIN-SUFFIX,servicewechat.com,DIRECT
+DOMAIN-SUFFIX,wx.qq.com,DIRECT
+DOMAIN-SUFFIX,wxs.qq.com,DIRECT
+DOMAIN-SUFFIX,qlogo.cn,DIRECT
+DOMAIN-SUFFIX,qpic.cn,DIRECT
+DOMAIN-SUFFIX,wx.gtimg.com,DIRECT

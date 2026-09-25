@@ -1,0 +1,18 @@
+! Title: 微信基础 DNS 白名单
+! Author: IMAiCool
+! Updated: 2026-09-26
+! Homepage: https://github.com/IMAiCool/Loon
+! 与同名 Loon 插件域名范围对应；important 仅影响 AdGuard 内部规则优先级。
+! 社区业务分类，不代表全部官方安全接口。扩展包含共用服务与统计域名。
+@@|weixin110.qq.com^$important
+@@|apd-pcdnwxlogin.teg.tencent-cloud.net^$important
+@@|wx.tenpay.com^$important
+@@||weixin.qq.com^$important
+@@||weixin.com^$important
+@@||wechat.com^$important
+@@||servicewechat.com^$important
+@@||wx.qq.com^$important
+@@||wxs.qq.com^$important
+@@||qlogo.cn^$important
+@@||qpic.cn^$important
+@@||wx.gtimg.com^$important

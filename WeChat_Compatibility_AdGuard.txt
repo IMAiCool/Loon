@@ -1,0 +1,25 @@
+! Title: 微信扩展兼容（按需启用） DNS 白名单
+! Author: IMAiCool
+! Updated: 2026-09-26
+! Homepage: https://github.com/IMAiCool/Loon
+! 与同名 Loon 插件域名范围对应；important 仅影响 AdGuard 内部规则优先级。
+! 社区业务分类，不代表全部官方安全接口。扩展包含共用服务与统计域名。
+@@|btrace.qq.com^$important
+@@|dldir1.qq.com^$important
+@@|slife.xy-asia.com^$important
+@@|soup.v.qq.com^$important
+@@|vweixinf.tc.qq.com^$important
+@@|wup.imtt.qq.com^$important
+@@||lbs.gtimg.com^$important
+@@||vweixinthumb.tc.qq.com^$important
+@@||up-hl.3g.qq.com^$important
+@@||yun-hl.3g.qq.com^$important
+@@||wxapp.tc.qq.com^$important
+@@||map.qq.com^$important
+@@||tenpay.com^$important
+@@||wechatpay.com^$important
+@@||wechatlegal.net^$important
+@@||wechatos.net^$important
+@@||weixinbridge.com^$important
+@@||weixinsxy.com^$important
+@@||iot-tencent.com^$important
