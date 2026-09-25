@@ -10,7 +10,7 @@
   const ad = item => {
     if (!item || typeof item !== "object" || Array.isArray(item)) return false;
     const v = item.aweme_info || item.aweme || item;
-    return [item, v].some(x => x && (marked(x.is_ads) || marked(x.is_ad) || present(x.raw_ad_data) || present(x.ad_id) || present(x.ad_data)));
+    return [item, v].some(x => x && (marked(x.is_ads) || marked(x.is_ad) || present(x.raw_ad_data) || present(x.ad_data)));
   };
   try {
     if (!category || options[category] !== true || $response.status !== 200 || typeof $response.body !== "string") return $done({});
@@ -33,3 +33,4 @@
   } catch (error) { console.log("[Douyin Clean] pass-through: " + String(error)); }
   $done({});
 })();
+
