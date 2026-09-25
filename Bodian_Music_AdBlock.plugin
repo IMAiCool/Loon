@@ -1,0 +1,43 @@
+#!name = 波点音乐去广告
+#!desc = 波点音乐广告与推荐广告位净化；保留登录、账号、歌曲播放、歌词、收藏等核心功能。
+#!author = 零一 / rules ref: zqzess
+#!icon = https://raw.githubusercontent.com/deezertidal/private/main/icons/bodian2.png
+#!tag = 波点音乐,去广告,净化
+#!system = iOS,iPadOS
+
+# ==========================================
+# 波点音乐 Loon 去广告
+# 已知规则来源：
+# https://github.com/ihxperfect/loon-plugin
+#
+# 处理内容：
+# 1. musicResource 资源广告
+# 2. view 页面广告/运营资源
+# 3. recommendList 推荐广告位
+# 4. bodiancdn 广告视频资源
+#
+# 不处理：
+# - 登录/验证码
+# - 用户资料
+# - 歌曲音频
+# - 歌词
+# - 收藏/歌单
+# - 会员状态
+# ==========================================
+
+[URL Rewrite]
+# 资源广告
+^http:\/\/bd-api\.kuwo\.cn\/api\/service\/resource\/musicResource\/.+ - reject
+
+# 广告/运营视频资源
+^https:\/\/bodiancdn\.kuwo\.cn\/.+\.mp4(?:\?.*)?$ - reject
+
+# 页面广告资源
+^http:\/\/bd-api\.kuwo\.cn\/api\/service\/resource\/view\?uid(?:=|&|$) - reject
+
+# 推荐列表广告资源
+^http:\/\/bd-api\.kuwo\.cn\/api\/service\/music\/recommendList\?uid(?:=|&|$) - reject
+
+[Mitm]
+# HTTPS CDN 规则需要读取 URL path；仅加入广告 CDN，不解密账号接口
+hostname = bodiancdn.kuwo.cn
