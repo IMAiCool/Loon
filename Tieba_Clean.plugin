@@ -1,0 +1,48 @@
+#!name = 百度贴吧去广告与净化
+#!desc = 百度贴吧开屏、推荐流、吧内列表、帖子详情、看图模式、悬浮广告、直播推荐、关联商品、部分吧头广告净化；支持可选隐藏推荐页视频贴。iOS 15+。
+#!author = 零一 / upstream: app2smile
+#!icon = https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/Tieba.png
+#!openUrl = https://github.com/app2smile/rules
+#!tag = 百度贴吧,去广告,净化
+#!system = iOS,iPadOS
+
+# ==================================================
+# 百度贴吧 Loon 去广告与净化
+# 上游脚本：app2smile/rules
+# 设计：
+# 1. 插件本体仅负责匹配、MITM、广告地址拦截
+# 2. JSON/Proto 数据净化交给上游脚本，便于后续更新
+# 3. 不屏蔽 passport.baidu.com 等登录域名，避免误伤登录/验证码
+# ==================================================
+
+[Argument]
+per_filter_video_thread = select,"0","1",tag=隐藏推荐页视频贴,desc=0=保留视频贴（推荐）；1=隐藏推荐页视频贴
+
+[Rule]
+# 贴吧广告地址；保留上游已验证规则
+DOMAIN,180.76.76.200,REJECT
+# no-resolve 必须放在相关域名/IP规则之后
+IP-CIDR,180.76.76.200/32,REJECT,no-resolve
+
+[Script]
+# JSON接口净化：
+# - 开屏广告
+# - 看图模式广告
+# - 首页/详情页悬浮广告
+# - 回复栏广告配置
+# - 穿山甲/优量汇/快手/百青藤/Ubix等广告初始化开关
+# - 吧头直播、图片广告
+# - 推荐直播、关联商品、详情页商品广告
+http-response ^https?:\/\/(tiebac|c\.tieba)\.baidu\.com\/(c\/(s\/sync|f\/(ad\/getSplashAd|frs\/(page|threadlist|generalTabList)|pb\/(pic)?page|excellent\/personalized))$|tiebaads\/commonbatch\?) script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/tieba-json.js,requires-body=true,timeout=10,tag=贴吧JSON净化
+
+# Proto接口净化：
+# - 推荐/吧内帖子流广告
+# - Feed广告
+# - 帖子详情广告
+# - 个性化推荐广告
+# - 可选过滤推荐页视频贴
+http-response ^https?:\/\/(tiebac|c\.tieba)\.baidu\.com\/c\/(b\/ad\/adBid|f\/(frs\/(page|threadlist|generalTabList)|ad\/getFeedAd|pb\/page|excellent\/personalized))\?cmd script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/tieba-proto.js,requires-body=true,binary-body-mode=true,timeout=10,tag=贴吧Proto净化,argument=[{per_filter_video_thread}]
+
+[Mitm]
+# 当前主要 HTTPS API 域名
+hostname = tiebac.baidu.com
