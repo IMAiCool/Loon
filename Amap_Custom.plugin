@@ -1,0 +1,40 @@
+#!name=高德地图净化+底栏自定义
+#!desc=去开屏/首页/搜索/详情/打车推广，并尝试按参数隐藏高德首页底栏标签；默认隐藏“探索”和中间语音入口，保留“首页/打车/我的”。
+#!author=ChatGPT × 零一
+#!tag=去广告,高德地图,底栏自定义
+#!system=iOS,iPadOS
+#!loon_version=3.5.0(975)
+#!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/Amap.png
+#!date=2026-09-26
+#!version=1.0.0
+
+[Argument]
+cleanSplash=switch,true,tag=开屏净化,desc=清理高德开屏广告
+cleanHome=switch,true,tag=首页净化,desc=清理首页运营卡片和活动配置
+cleanSearch=switch,true,tag=搜索净化,desc=清理搜索热词、广告卡、酒店推广等
+cleanPoi=switch,true,tag=地点详情净化,desc=清理地点详情页优惠、推广和推荐模块
+cleanTaxi=switch,true,tag=打车净化,desc=清理打车页横幅、气泡、活动入口和弹窗
+cleanMine=switch,true,tag=我的页面净化,desc=清理我的页面运营卡、会员推广和活动卡
+customTab=switch,true,tag=启用底栏自定义,desc=仅在识别到完整底栏 JSON 结构时修改；不会盲删普通列表
+hideExplore=switch,true,tag=隐藏“探索”,desc=底栏识别成功时隐藏探索/发现
+hideVoice=switch,true,tag=隐藏“语音”,desc=底栏识别成功时隐藏中间语音/长按说话入口
+hideTaxi=switch,false,tag=隐藏“打车”,desc=需要极简底栏时可开启
+hideMine=switch,false,tag=隐藏“我的”,desc=不建议开启；开启后仍可通过其他入口访问账号功能（具体取决于高德版本）
+debug=switch,false,tag=调试日志,desc=输出底栏识别与修改日志，用于适配高德新版
+
+[Rule]
+DOMAIN,optimus-ads.amap.com,REJECT
+DOMAIN,amap-aos-info-nogw.amap.com,REJECT
+
+[Rewrite]
+^https:\/\/m5\.amap\.com\/ws\/shield\/search\/new_hotword\? reject-dict
+^https:\/\/m5\.amap\.com\/ws\/shield\/search_poi\/tips_adv\? reject-dict
+^https:\/\/oss\.amap\.com\/ws\/banner\/lists\/\? reject-dict
+
+[Script]
+http-response ^https:\/\/m5\.amap\.com\/ws\/(?:faas\/amap-navigation\/main-page(?:\?|$)|shield\/frogserver\/aocs\/updatable\/1(?:\?|$)|shield\/dsp\/profile\/index\/nodefaasv3(?:\?|$)|shield\/search_bff\/hotword\?|shield\/search_poi\/(?:homepage|sug|mps|search\/sp|tips_operation_location)|valueadded\/alimama\/splash_screen\?) script-path=Amap_Custom.js,requires-body=true,argument=[{cleanSplash},{cleanHome},{cleanSearch},{cleanPoi},{cleanTaxi},{cleanMine},{customTab},{hideExplore},{hideVoice},{hideTaxi},{hideMine},{debug}],timeout=10,tag=高德地图净化
+http-response ^https:\/\/m5-zb\.amap\.com\/ws\/(?:promotion-web\/resource(?:\/home)?\?|boss\/(?:car\/order\/content_info|order_web\/friendly_information)) script-path=Amap_Custom.js,requires-body=true,argument=[{cleanSplash},{cleanHome},{cleanSearch},{cleanPoi},{cleanTaxi},{cleanMine},{customTab},{hideExplore},{hideVoice},{hideTaxi},{hideMine},{debug}],timeout=10,tag=高德打车净化
+http-response ^https:\/\/(?:info|m5)\.amap\.com\/ws\/shield\/search\/poi\/detail script-path=Amap_Custom.js,requires-body=true,argument=[{cleanSplash},{cleanHome},{cleanSearch},{cleanPoi},{cleanTaxi},{cleanMine},{customTab},{hideExplore},{hideVoice},{hideTaxi},{hideMine},{debug}],timeout=10,tag=高德地点详情净化
+
+[MitM]
+hostname=m5.amap.com,m5-zb.amap.com,info.amap.com,oss.amap.com
