@@ -1,0 +1,13 @@
+#!name=哔哩哔哩-视频详情页广告
+#!desc=移除视频详情页淘宝精选等商业推广卡片
+#!icon=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Bilibili.png
+#!author=ChatGPT
+
+[Script]
+
+# 视频详情页 gRPC 商业推广
+http-response ^https:\/\/(?:app\.bilibili\.com|grpc\.biliapi\.net)\/bilibili\.app\.viewunite\.v1\.View\/View$ script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-proto.js,requires-body=1,max-size=0,tag=B站视频详情页广告
+
+[MITM]
+
+hostname = app.bilibili.com, grpc.biliapi.net
